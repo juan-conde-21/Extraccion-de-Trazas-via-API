@@ -1,6 +1,6 @@
 # Extraccion-de-Trazas-via-API
 
-# Prequisito generar su Api token en Instana.
+# Prequisito generar el Api token en Instana.
 
 1. Dirigirse a la seccion de Settings y ubicar la opcion de Api Token
  
@@ -24,7 +24,7 @@
   **windowsSize**: Indicar el tiempo de consulta en milisegundos (ejemplo el rango de una hora es 3600000 milisegundos, este valor se restara del campo **"to"** definido en el punto anterior, obteniendo como resultado las trazas desde 15-05-2024 15:00:00 hasta 15-05-2024 16:00:00)
 
   **tagFilterExpression**
-  Se utiliza para colocar el filtrado de entidades, para este ejemplo usamos el nombre del servicio y las llamadas con error
+  Se utiliza para colocar el filtrado de entidades, para este ejemplo usamos el nombre del servicio "bstrfinmediatas" y las llamadas con error "call.erroneous"
 
   **Request Body de ejemplo**
 
@@ -88,6 +88,13 @@
   
   ![image](https://github.com/juan-conde-21/Extraccion-de-Trazas-via-API/assets/13276404/5f4c99db-6acd-442b-be1a-96edcd419052)
 
+  **Ejemplo de ejecucion comando curl**
+
+  Reemplazar los valores de {tenant-id} y {apiToken} con los valores correspondientes a su tenant Instana, modificar el nombre del servicio de acuerdo con su criterio de busqueda.
+
+    curl -XPOST https://{tenant-id}.instana.io/api/application-monitoring/analyze/traces -H "Content-Type: application/json" -H "authorization: apiToken {apiToken}" -d '{"timeFrame":{"to":1715806800000,"windowSize":3600000,"focusedMoment":1715806800000,"autoRefresh":false},"tagFilterExpression":{"type":"EXPRESSION","logicalOperator":"AND","elements":[{"type":"TAG_FILTER","name":"service.name","operator":"EQUALS","entity":"DESTINATION","value":"bstransferencias"},{"type":"TAG_FILTER","name":"call.erroneous","operator":"EQUALS","entity":"NOT_APPLICABLE","value":true}]},"metrics":[{"metric":"traces","aggregation":"SUM"},{"metric":"errors","aggregation":"MEAN"},{"metric":"latency","aggregation":"MEAN"}],"order":{"by":"timestamp","direction":"DESC"},"group":{},"includeInternal":false,"includeSynthetic":false}'
+
+
 
 ## Extraer detalle de las trazas
 
@@ -111,6 +118,13 @@
 
   Como se muestra la traza "c6471e92ad483b93" tiene un error en la llamada con id "c70dee7d36029987".
 
+  **Ejemplo de ejecucion comando curl**
+
+  Reemplazar los valores de {tenant-id} y {apiToken} con los valores correspondientes a su tenant Instana, modificar el valor de {traceId} de acuerdo con la traza a consultar.
+
+    curl https://{tenant-id}.instana.io/api/application-monitoring/v2/analyze/traces/{traceId} -H "Content-Type: application/json" -H "authorization: apiToken {apiToken}"
+
+
 
 ## Extraer detalle de las llamadas con error pertenecientes a una traza
 
@@ -130,9 +144,11 @@
   
   ![image](https://github.com/juan-conde-21/Extraccion-de-Trazas-via-API/assets/13276404/3bac49d2-2191-409d-ac23-9ad8f905dd38)
 
+  **Ejemplo de ejecucion comando curl**
 
+  Reemplazar los valores de {tenant-id} y {apiToken} con los valores correspondientes a su tenant Instana, modificar los valores de {traceId} y {callId} de acuerdo con la traza y llamada a consultar.
 
-
+    curl https://{tenant-id}.instana.io/api/application-monitoring/v2/analyze/traces/{traceId}/calls/{callId}/details -H "Content-Type: application/json" -H "authorization: apiToken {apiToken}"
 
 
 
