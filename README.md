@@ -94,6 +94,13 @@
 
     curl -XPOST https://{tenant-id}.instana.io/api/application-monitoring/analyze/traces -H "Content-Type: application/json" -H "authorization: apiToken {apiToken}" -d '{"timeFrame":{"to":1715806800000,"windowSize":3600000,"focusedMoment":1715806800000,"autoRefresh":false},"tagFilterExpression":{"type":"EXPRESSION","logicalOperator":"AND","elements":[{"type":"TAG_FILTER","name":"service.name","operator":"EQUALS","entity":"DESTINATION","value":"bstransferencias"},{"type":"TAG_FILTER","name":"call.erroneous","operator":"EQUALS","entity":"NOT_APPLICABLE","value":true}]},"metrics":[{"metric":"traces","aggregation":"SUM"},{"metric":"errors","aggregation":"MEAN"},{"metric":"latency","aggregation":"MEAN"}],"order":{"by":"timestamp","direction":"DESC"},"group":{},"includeInternal":false,"includeSynthetic":false}'
 
+  Con los resultados obtenidos se pueden identificar los campos a nivel de los indicadores clave de la traza.
+
+  - **startTime**: Fecha de incio en milisegundos formato epoch timestamp.  
+  - **duration**: Tiempo en que se procesa la traza completa.
+  - **erroneous**: Indica el estado de error de la primera llamada de la traza.
+
+  Para calcular el tiempo de finalizacion se debe sumar startTime + duration.
 
 
 ## Extraer detalle de las trazas
@@ -124,6 +131,13 @@
 
     curl https://{tenant-id}.instana.io/api/application-monitoring/v2/analyze/traces/{traceId} -H "Content-Type: application/json" -H "authorization: apiToken {apiToken}"
 
+  Con los resultados obtenidos se pueden identificar los campos a nivel de los indicadores clave de la traza y llamada.
+
+  - **timestamp**: Fecha de incio en milisegundos formato epoch timestamp.
+  - **duration**: Tiempo en que se procesa la traza completa.\n
+  - **errorCount**: Indica la cantidad de errores identificados en la llamada.
+
+  Para calcular el tiempo de finalizacion se debe sumar timestamp + duration.
 
 
 ## Extraer detalle de las llamadas con error pertenecientes a una traza
@@ -150,6 +164,14 @@
 
     curl https://{tenant-id}.instana.io/api/application-monitoring/v2/analyze/traces/{traceId}/calls/{callId}/details -H "Content-Type: application/json" -H "authorization: apiToken {apiToken}"
 
+  Con los resultados obtenidos se pueden identificar los campos a nivel de los indicadores clave de la traza y llamada.
 
+  - **start**: Fecha de incio en milisegundos formato epoch timestamp.
+  - **duration**: Tiempo en que se procesa la traza completa.
+  - **errorCount**: Indica la cantidad de errores identificados en la llamada.
+  - **spans.data**: Contiene el detalle a nivel de status code para cada span (ejecucion de linea de codigo).
+  - **logs**: Detalle de los logs de errores identificados en la llamada.
+
+  Para calcular el tiempo de finalizacion se debe sumar timestamp + duration.
 
 
