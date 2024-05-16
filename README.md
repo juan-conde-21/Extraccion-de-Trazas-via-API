@@ -169,7 +169,7 @@
   - **start**: Fecha de incio en milisegundos formato epoch timestamp.
   - **duration**: Tiempo en que se procesa la traza completa.
   - **errorCount**: Indica la cantidad de errores identificados en la llamada.
-  - **spans.data**: Contiene el detalle a nivel de status code para cada span (ejecucion de linea de codigo).
+  - **spans.data**: Contiene el detalle a nivel de status code para cada span (ejecución de linea de codigo).
   - **logs**: Detalle de los logs de errores identificados en la llamada.
 
   Para calcular el tiempo de finalizacion se debe sumar timestamp + duration.
