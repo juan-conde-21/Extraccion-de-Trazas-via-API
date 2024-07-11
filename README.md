@@ -175,3 +175,101 @@
   Para calcular el tiempo de finalizacion se debe sumar timestamp + duration.
 
 
+## Extraer Llamadas Fallidas agrupado por endpoint a nivel de cada servicio
+
+  URL endpoint Instana
+  
+  https://{tenant-id}.instana.io/api/application-monitoring/analyze/call-groups?fillTimeSeries=true
+
+  **Timeframe**
+  
+  **to**: Indicar la fecha hasta cuando se realiza la consulta en formato epoch timestamp (ejemplo la fecha 15-05-2024 16:00:00 se traduce como 1715806800000)
+
+  **windowsSize**: Indicar el tiempo de consulta en milisegundos (ejemplo el rango de una hora es 3600000 milisegundos, este valor se restara del campo **"to"** definido en el punto anterior, obteniendo como resultado las trazas desde 15-05-2024 15:00:00 hasta 15-05-2024 16:00:00)
+
+  **tagFilterExpression**
+  Se utiliza para colocar el filtrado de entidades, para este ejemplo usamos el nombre del servicio "bstrfinmediatas" y las llamadas con error "call.erroneous"
+
+  **Request Body de ejemplo**
+
+    {
+        "timeFrame": {
+            "to": 1720587600000,
+            "windowSize": 86400000,
+            "autoRefresh": false
+        },
+        "tagFilterExpression": {
+            "type": "EXPRESSION",
+            "logicalOperator": "AND",
+            "elements": [
+                {
+                    "type": "TAG_FILTER",
+                    "name": "service.name",
+                    "operator": "EQUALS",
+                    "entity": "DESTINATION",
+                    "value": "bstrfinmediatas"
+                },
+                {
+                    "type": "TAG_FILTER",
+                    "name": "call.erroneous",
+                    "operator": "EQUALS",
+                    "entity": "NOT_APPLICABLE",
+                    "value": true
+                }
+            ]
+        },
+        "metrics": [
+            {
+                "metric": "calls",
+                "aggregation": "SUM"
+            },
+            {
+                "metric": "errors",
+                "aggregation": "MEAN"
+            },
+            {
+                "metric": "latency",
+                "aggregation": "MEAN"
+            }
+        ],
+        "order": {
+            "by": "calls",
+            "direction": "DESC"
+        },
+        "group": {
+            "groupbyTag": "endpoint.name",
+            "groupbyTagEntity": "DESTINATION"
+        },
+        "includeInternal": false,
+        "includeSynthetic": false
+    }
+
+    **Ejemplo de ejecucion en postman**
+
+  Ubicar el api de analisis de trazas
+
+  ![image](https://github.com/juan-conde-21/Extraccion-de-Trazas-via-API/assets/13276404/d8ebdccb-a19a-466c-9db2-6ab1a0aed402)
+
+  Ejecutar la consulta
+  
+  ![image](https://github.com/juan-conde-21/Extraccion-de-Trazas-via-API/assets/13276404/ee51ac63-c9e7-42aa-8d7a-9cbc3ee403bb)
+
+
+  **Ejemplo de ejecucion comando curl**
+
+  Reemplazar los valores de {tenant-id} y {apiToken} con los valores correspondientes a su tenant Instana, modificar el nombre del servicio de acuerdo con su criterio de busqueda.
+
+    curl -XPOST https://{tenant-id}.instana.io/api/application-monitoring/analyze/call-groups?fillTimeSeries=true -H "Content-Type: application/json" -H "authorization: apiToken {apiToken}" -d '{"timeFrame":{"to":1720587600000,"windowSize":86400000,"autoRefresh":false},"tagFilterExpression":{"type":"EXPRESSION","logicalOperator":"AND","elements":[{"type":"TAG_FILTER","name":"service.name","operator":"EQUALS","entity":"DESTINATION","value":"jocuentaahorros"},{"type":"TAG_FILTER","name":"call.erroneous","operator":"EQUALS","entity":"NOT_APPLICABLE","value":true}]},"metrics":[{"metric":"calls","aggregation":"SUM"},{"metric":"errors","aggregation":"MEAN"},{"metric":"latency","aggregation":"MEAN"}],"order":{"by":"calls","direction":"DESC"},"group":{"groupbyTag":"endpoint.name","groupbyTagEntity":"DESTINATION"},"includeInternal":false,"includeSynthetic":false}'
+
+  Con los resultados obtenidos se pueden identificar los campos a nivel de los indicadores clave de la traza.
+
+  - **name**: Nombre del endpoint donde se presentaron los errores.
+  - **timestamp**: Fecha de incio en milisegundos formato epoch timestamp.
+  - **errors.mean**: Indica el estado de error de la primera llamada de la traza.
+  - **calls.sum**: Cantidad de errores para el endpoint.
+  - **latency.mean**: Promedio de latencia para el endpoint en milisegundos
+
+
+
+
+
